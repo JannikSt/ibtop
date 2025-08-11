@@ -3,5 +3,5 @@
 version = 4
 
 [[package]]
-name = "infinitop"
+name = "ibtop"
 version = "0.1.0"
