@@ -9,13 +9,24 @@ Real-time terminal monitor for InfiniBand networks - htop for high-speed interco
 
 ## Installation
 
-### From Release Binary
+### Quick Install (Recommended)
 
 ```bash
-# Download the latest release
-wget https://github.com/JannikSt/ibtop/releases/download/v0.1.0/ibtop-linux-amd64
-chmod +x ibtop-linux-amd64
-sudo mv ibtop-linux-amd64 /usr/local/bin/ibtop
+# Install the latest release automatically
+curl -fsSL https://raw.githubusercontent.com/JannikSt/ibtop/main/install.sh | bash
+```
+
+### Manual Installation
+
+```bash
+# Download the latest release for your architecture
+# For x86_64:
+wget https://github.com/JannikSt/ibtop/releases/latest/download/ibtop-linux-amd64
+# For arm64:
+wget https://github.com/JannikSt/ibtop/releases/latest/download/ibtop-linux-arm64
+
+chmod +x ibtop-linux-*
+sudo mv ibtop-linux-* /usr/local/bin/ibtop
 ```
 
 ### From Source
