@@ -65,25 +65,9 @@ ibtop
 - **Intel/Cornelis** - May require adjustments for hw_counters path
 - **Other IB adapters** - Should work if they follow standard sysfs layout
 
-## Building from Source
-
-```bash
-# Clone the repository
-git clone https://github.com/JannikSt/ibtop.git
-cd ibtop
-
-# Build debug version
-cargo build
-
-# Build optimized release
-cargo build --release
-
-# Run tests
-cargo test
-```
 ## License
 
-MIT License
+Apache License 2.0
 
 ## Contributing
 
