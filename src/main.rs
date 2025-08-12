@@ -1,4 +1,5 @@
 mod discovery;
+mod metrics;
 mod types;
 mod ui;
 
@@ -9,20 +10,20 @@ use crossterm::{
 };
 use ratatui::{backend::CrosstermBackend, Terminal};
 use std::io;
-use std::time::Duration;
+use std::time::{Duration, Instant};
+
+const UI_REFRESH_INTERVAL_MS: u64 = 33;
+const METRICS_UPDATE_INTERVAL_MS: u64 = 250;
 
 fn main() -> Result<(), io::Error> {
-    // Setup terminal
     enable_raw_mode()?;
     let mut stdout = io::stdout();
     execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    // Run the app
     let res = run_app(&mut terminal);
 
-    // Restore terminal
     disable_raw_mode()?;
     execute!(
         terminal.backend_mut(),
@@ -40,25 +41,44 @@ fn main() -> Result<(), io::Error> {
 
 fn run_app<B: ratatui::backend::Backend>(terminal: &mut Terminal<B>) -> io::Result<()> {
     let use_fake_data = std::env::var("IBTOP_FAKE_DATA").is_ok();
+    let mut metrics = metrics::MetricsCollector::new();
+
+    let ui_refresh_duration = Duration::from_millis(UI_REFRESH_INTERVAL_MS);
+    let metrics_update_interval = Duration::from_millis(METRICS_UPDATE_INTERVAL_MS);
+
+    let mut last_metrics_update = Instant::now();
+    let mut adapters = Vec::new();
 
     loop {
-        let adapters = if use_fake_data {
-            discovery::fake::generate_fake_adapters()
-        } else {
-            let real_adapters = discovery::discover_adapters();
-            if real_adapters.is_empty() && std::env::var("IBTOP_DEMO").is_ok() {
+        let now = Instant::now();
+
+        if now.duration_since(last_metrics_update) >= metrics_update_interval {
+            adapters = if use_fake_data {
                 discovery::fake::generate_fake_adapters()
             } else {
-                real_adapters
-            }
-        };
+                let real_adapters = discovery::discover_adapters();
+                if real_adapters.is_empty() && std::env::var("IBTOP_DEMO").is_ok() {
+                    discovery::fake::generate_fake_adapters()
+                } else {
+                    real_adapters
+                }
+            };
 
-        terminal.draw(|f| ui::draw(f, &adapters))?;
+            metrics.update(&adapters);
+            last_metrics_update = now;
+        }
 
-        if event::poll(Duration::from_millis(100))? {
+        terminal.draw(|f| ui::draw(f, &adapters, &metrics))?;
+
+        let timeout = ui_refresh_duration.saturating_sub(now.elapsed());
+        if event::poll(timeout)? {
             if let Event::Key(key) = event::read()? {
-                if key.code == KeyCode::Char('q') || key.code == KeyCode::Esc {
-                    return Ok(());
+                match key.code {
+                    KeyCode::Char('q') | KeyCode::Esc => return Ok(()),
+                    KeyCode::Char('r') => {
+                        last_metrics_update = Instant::now() - metrics_update_interval;
+                    }
+                    _ => {}
                 }
             }
         }
