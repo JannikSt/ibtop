@@ -5,15 +5,13 @@ Real-time terminal monitor for InfiniBand networks - htop for high-speed interco
 ![Version](https://img.shields.io/badge/version-0.1.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-![ibtop screenshot](https://raw.githubusercontent.com/yourusername/ibtop/main/docs/screenshot.png)
-
 ## Installation
 
 ### From Release Binary
 
 ```bash
 # Download the latest release
-wget https://github.com/yourusername/ibtop/releases/download/v0.1.0/ibtop-linux-amd64
+wget https://github.com/JannikSt/ibtop/releases/download/v0.1.0/ibtop-linux-amd64
 chmod +x ibtop-linux-amd64
 sudo mv ibtop-linux-amd64 /usr/local/bin/ibtop
 ```
@@ -22,7 +20,7 @@ sudo mv ibtop-linux-amd64 /usr/local/bin/ibtop
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/ibtop.git
+git clone https://github.com/JannikSt/ibtop.git
 cd ibtop
 
 # Build and install
@@ -30,19 +28,11 @@ cargo build --release
 sudo cp target/release/ibtop /usr/local/bin/
 ```
 
-
-
 ## Usage
 
 ```bash
 # Monitor all InfiniBand adapters
 ibtop
-
-# Run with demo data (no IB hardware required)
-IBTOP_DEMO=1 ibtop
-
-# Run with fake data for testing
-IBTOP_FAKE_DATA=1 ibtop
 ```
 
 ### Controls
@@ -66,7 +56,7 @@ IBTOP_FAKE_DATA=1 ibtop
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/ibtop.git
+git clone https://github.com/JannikSt/ibtop.git
 cd ibtop
 
 # Build debug version
