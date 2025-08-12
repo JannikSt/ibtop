@@ -62,10 +62,16 @@ fn create_port_info(port_number: u16, adapter_path: &std::path::Path) -> PortInf
 
 fn read_port_state(port_path: &std::path::Path) -> String {
     let state_path = port_path.join("state");
-    std::fs::read_to_string(state_path)
+    let raw_state = std::fs::read_to_string(state_path)
         .unwrap_or_default()
         .trim()
-        .to_string()
+        .to_string();
+    
+    if let Some(colon_pos) = raw_state.find(':') {
+        raw_state[colon_pos + 1..].trim().to_string()
+    } else {
+        raw_state
+    }
 }
 
 fn read_port_counters(port_path: &std::path::Path) -> PortCounters {
@@ -86,7 +92,13 @@ fn read_port_counters(port_path: &std::path::Path) -> PortCounters {
 }
 
 fn read_counter_value(counters_path: &std::path::Path, filename: &str) -> u64 {
-    std::fs::read_to_string(counters_path.join(filename))
+    let value = std::fs::read_to_string(counters_path.join(filename))
         .map(|content| content.trim().parse().unwrap_or(0))
-        .unwrap_or(0)
+        .unwrap_or(0);
+    
+    if filename == "port_rcv_data" || filename == "port_xmit_data" {
+        value * 4
+    } else {
+        value
+    }
 }
