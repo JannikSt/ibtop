@@ -3,7 +3,7 @@
 Real-time terminal monitor for InfiniBand networks - htop for high-speed interconnects
 
 ![Version](https://img.shields.io/badge/version-0.1.0-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
+![License](https://img.shields.io/badge/license-Apache-green)
 
 ![Screenshot](docs/screenshot.png)
 
