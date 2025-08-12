@@ -1,7 +1,18 @@
 name: Release
 on:
   push:
-    tags: ['v*']
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to create release for'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  discussions: write
 
 env:
   CARGO_TERM_COLOR: always
@@ -21,6 +32,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
       
       - uses: dtolnay/rust-toolchain@stable
         with:
@@ -52,15 +65,52 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
       
       - uses: actions/download-artifact@v4
       
-      - name: Create release
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Get tag name
+        id: tag
         run: |
-          gh release create ${{ github.ref_name }} \
-            --title "Release ${{ github.ref_name }}" \
-            --generate-notes \
-            --repo ${{ github.repository }} \
-            **/ibtop-*
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag_name=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag_name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.tag.outputs.tag_name }}
+          name: Release ${{ steps.tag.outputs.tag_name }}
+          body: |
+            🚀 Release ${{ steps.tag.outputs.tag_name }}
+            
+            Real-time terminal monitor for InfiniBand networks
+            
+            Platform support:
+            - Linux x86_64
+            - Linux ARM64
+            
+            ## Installation
+            Download the appropriate binary for your system.
+            
+            ```bash
+            # Linux x86_64
+            wget https://github.com/JannikSt/ibtop/releases/download/${{ steps.tag.outputs.tag_name }}/ibtop-linux-amd64
+            chmod +x ibtop-linux-amd64
+            sudo mv ibtop-linux-amd64 /usr/local/bin/ibtop
+            
+            # Linux ARM64
+            wget https://github.com/JannikSt/ibtop/releases/download/${{ steps.tag.outputs.tag_name }}/ibtop-linux-arm64
+            chmod +x ibtop-linux-arm64
+            sudo mv ibtop-linux-arm64 /usr/local/bin/ibtop
+            ```
+          files: |
+            ibtop-linux-amd64/ibtop-linux-amd64
+            ibtop-linux-arm64/ibtop-linux-arm64
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
