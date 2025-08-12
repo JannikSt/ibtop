@@ -2,6 +2,14 @@
 name = "ibtop"
 version = "0.1.0"
 edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "Real-time terminal monitor for InfiniBand networks"
+readme = "README.md"
+homepage = "https://github.com/yourusername/ibtop"
+repository = "https://github.com/yourusername/ibtop"
+license = "MIT"
+keywords = ["infiniband", "monitoring", "tui", "network", "rdma"]
+categories = ["command-line-utilities", "network-programming"]
 
 [dependencies]
 ratatui = "0.26"

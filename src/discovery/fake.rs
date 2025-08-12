@@ -53,7 +53,8 @@ pub fn generate_fake_adapters() -> Vec<AdapterInfo> {
             ports: vec![
                 PortInfo {
                     port_number: 1,
-                    state: "ACTIVE".to_string(),
+                    state: crate::types::PortState::Active,
+                    rate: "100 Gb/sec (4X EDR)".to_string(),
                     counters: PortCounters {
                         rx_bytes: rx_bytes_0,
                         tx_bytes: tx_bytes_0,
@@ -66,7 +67,8 @@ pub fn generate_fake_adapters() -> Vec<AdapterInfo> {
                 },
                 PortInfo {
                     port_number: 2,
-                    state: "DOWN".to_string(),
+                    state: crate::types::PortState::Down,
+                    rate: "100 Gb/sec (4X EDR)".to_string(),
                     counters: PortCounters::default(),
                 },
             ],
@@ -75,7 +77,8 @@ pub fn generate_fake_adapters() -> Vec<AdapterInfo> {
             name: "mlx5_1".to_string(),
             ports: vec![PortInfo {
                 port_number: 1,
-                state: "ACTIVE".to_string(),
+                state: crate::types::PortState::Active,
+                rate: "200 Gb/sec (4X HDR)".to_string(),
                 counters: PortCounters {
                     rx_bytes: rx_bytes_1,
                     tx_bytes: tx_bytes_1,

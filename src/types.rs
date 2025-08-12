@@ -1,17 +1,32 @@
+use std::fmt::Display;
 use std::str::FromStr;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Default)]
 pub(crate) enum PortState {
-    ACTIVE,
-    DOWN,
+    Active,
+    Down,
+    #[default]
+    Unknown,
 }
+impl Display for PortState {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            PortState::Active => write!(f, "ACTIVE"),
+            PortState::Down => write!(f, "DOWN"),
+            PortState::Unknown => write!(f, "UNKNOWN"),
+        }
+    }
+}
+
 
 impl FromStr for PortState {
     type Err = ();
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "ACTIVE" => Ok(PortState::ACTIVE),
-            "DOWN" => Ok(PortState::DOWN),
-            _ => Err(()),
+        match s.trim() {
+            "ACTIVE" => Ok(PortState::Active),
+            "DOWN" => Ok(PortState::Down),
+            _ => Ok(PortState::Unknown),
         }
     }
 }
@@ -25,11 +40,12 @@ pub(crate) struct AdapterInfo {
 #[derive(Debug, Default)]
 pub(crate) struct PortInfo {
     pub(crate) port_number: u16,
-    pub(crate) state: String,
+    pub(crate) state: PortState,
+    pub(crate) rate: String,
     pub(crate) counters: PortCounters,
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub(crate) struct PortCounters {
     pub(crate) rx_bytes: u64,
     pub(crate) tx_bytes: u64,
