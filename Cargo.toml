@@ -2,11 +2,11 @@
 name = "ibtop"
 version = "0.1.0"
 edition = "2021"
-authors = ["Your Name <your.email@example.com>"]
+authors = ["info@jannik-straube.de"]
 description = "Real-time terminal monitor for InfiniBand networks"
 readme = "README.md"
-homepage = "https://github.com/yourusername/ibtop"
-repository = "https://github.com/yourusername/ibtop"
+homepage = "https://github.com/JannikSt/ibtop"
+repository = "https://github.com/JannikSt/ibtop"
 license = "MIT"
 keywords = ["infiniband", "monitoring", "tui", "network", "rdma"]
 categories = ["command-line-utilities", "network-programming"]
