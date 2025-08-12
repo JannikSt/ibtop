@@ -1,8 +1,7 @@
 use std::fmt::Display;
 use std::str::FromStr;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[derive(Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub(crate) enum PortState {
     Active,
     Down,
@@ -18,7 +17,6 @@ impl Display for PortState {
         }
     }
 }
-
 
 impl FromStr for PortState {
     type Err = ();
