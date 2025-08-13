@@ -1,6 +1,6 @@
 pub(crate) mod fake;
 
-use crate::types::*;
+use crate::types::{AdapterInfo, PortCounters, PortInfo, PortState};
 
 const MLX5_DATA_MULTIPLIER: u64 = 4; // mlx5 reports in 32-bit words
 
@@ -15,7 +15,11 @@ pub(crate) fn discover_adapters() -> Vec<AdapterInfo> {
     };
 
     for entry in entries.flatten() {
-        if let Some(adapter_name) = entry.file_name().to_str().map(|s| s.to_string()) {
+        if let Some(adapter_name) = entry
+            .file_name()
+            .to_str()
+            .map(std::string::ToString::to_string)
+        {
             let adapter = create_adapter_info(adapter_name, &entry.path());
             adapters.push(adapter);
         }
