@@ -26,7 +26,7 @@ fn draw_help_footer(frame: &mut Frame, area: Rect) {
     let help_text = Paragraph::new("Controls: q=quit").style(Style::default().fg(Color::DarkGray));
     frame.render_widget(help_text, area);
 }
-
+#[allow(clippy::too_many_lines)]
 fn draw_adapters(
     frame: &mut Frame,
     area: Rect,
@@ -147,16 +147,22 @@ fn draw_adapters(
 }
 
 fn format_bytes(bytes: u64) -> String {
-    const UNITS: &[&str] = &["B", "KB", "MB", "GB", "TB"];
-    let mut value = bytes as f64;
+    const UNITS: &[&str] = &["B", "KB", "MB", "GB", "TB", "PB"];
+    let mut value = bytes;
     let mut unit_index = 0;
 
-    while value >= 1024.0 && unit_index < UNITS.len() - 1 {
-        value /= 1024.0;
+    while value >= 1024 && unit_index < UNITS.len() - 1 {
+        value /= 1024;
         unit_index += 1;
     }
 
-    format!("{:.1}{}", value, UNITS[unit_index])
+    if unit_index == 0 {
+        format!("{}{}", value, UNITS[unit_index])
+    } else {
+        let fractional = (bytes >> (10 * (unit_index - 1))) % 1024;
+        let decimal_part = (fractional * 10) / 1024;
+        format!("{}.{}{}", value, decimal_part, UNITS[unit_index])
+    }
 }
 
 fn format_bytes_per_sec(bytes_per_sec: f64) -> String {
@@ -173,5 +179,36 @@ fn format_bytes_per_sec(bytes_per_sec: f64) -> String {
         format!("{:.2}{}", value, UNITS[unit_index])
     } else {
         format!("{:.1}{}", value, UNITS[unit_index])
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_format_bytes() {
+        assert_eq!(format_bytes(0), "0B");
+        assert_eq!(format_bytes(1023), "1023B");
+        assert_eq!(format_bytes(1024), "1.0KB");
+        assert_eq!(format_bytes(1025), "1.0KB");
+        assert_eq!(format_bytes(1024 * 1024), "1.0MB");
+        assert_eq!(format_bytes(1024 * 1024 * 1024), "1.0GB");
+        assert_eq!(format_bytes(1024 * 1024 * 1024 * 1024), "1.0TB");
+        assert_eq!(format_bytes(1024 * 1024 * 1024 * 1024 * 1024), "1.0PB");
+    }
+
+    #[test]
+    fn test_format_bytes_per_sec() {
+        assert_eq!(format_bytes_per_sec(0.0), "0.00B/s");
+        assert_eq!(format_bytes_per_sec(1023.0), "1023.0B/s");
+        assert_eq!(format_bytes_per_sec(1024.0), "1.0KB/s");
+        assert_eq!(format_bytes_per_sec(1025.0), "1.0KB/s");
+        assert_eq!(format_bytes_per_sec(1024.0 * 1024.0), "1.0MB/s");
+        assert_eq!(format_bytes_per_sec(1024.0 * 1024.0 * 1024.0), "1.0GB/s");
+        assert_eq!(
+            format_bytes_per_sec(1024.0 * 1024.0 * 1024.0 * 1024.0),
+            "1.0TB/s"
+        );
     }
 }

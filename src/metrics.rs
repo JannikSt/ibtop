@@ -38,8 +38,7 @@ impl MetricsCollector {
         let now = Instant::now();
         let time_delta = self
             .last_collection
-            .map(|last| now.duration_since(last))
-            .unwrap_or(Duration::from_secs(1));
+            .map_or(Duration::from_secs(1), |last| now.duration_since(last));
 
         // Track current port keys to clean up stale entries
         let mut current_port_keys = std::collections::HashSet::new();
@@ -50,7 +49,7 @@ impl MetricsCollector {
                 current_port_keys.insert(port_key.clone());
 
                 if let Some(prev_counters) = self.previous_counters.get(&port_key) {
-                    let metrics = self.calculate_rates(prev_counters, &port.counters, time_delta);
+                    let metrics = Self::calculate_rates(prev_counters, &port.counters, time_delta);
                     self.current_metrics.insert(port_key.clone(), metrics);
                 }
 
@@ -69,8 +68,8 @@ impl MetricsCollector {
         self.last_collection = Some(now);
     }
 
+    #[allow(clippy::cast_precision_loss)]
     fn calculate_rates(
-        &self,
         prev: &PortCounters,
         current: &PortCounters,
         time_delta: Duration,
@@ -91,7 +90,7 @@ impl MetricsCollector {
     }
 
     pub fn get_metrics(&self, adapter_name: &str, port_number: u16) -> Option<&PortMetrics> {
-        let port_key = format!("{}:{}", adapter_name, port_number);
+        let port_key = format!("{adapter_name}:{port_number}");
         self.current_metrics.get(&port_key)
     }
 }

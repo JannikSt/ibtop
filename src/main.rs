@@ -33,7 +33,7 @@ fn main() -> Result<(), io::Error> {
     terminal.show_cursor()?;
 
     if let Err(err) = res {
-        println!("{:?}", err);
+        println!("{err:?}");
     }
 
     Ok(())
@@ -76,7 +76,9 @@ fn run_app<B: ratatui::backend::Backend>(terminal: &mut Terminal<B>) -> io::Resu
                 match key.code {
                     KeyCode::Char('q') | KeyCode::Esc => return Ok(()),
                     KeyCode::Char('r') => {
-                        last_metrics_update = Instant::now() - metrics_update_interval;
+                        last_metrics_update = Instant::now()
+                            .checked_sub(metrics_update_interval)
+                            .unwrap_or_else(Instant::now);
                     }
                     _ => {}
                 }
