@@ -76,8 +76,9 @@ fn run_app<B: ratatui::backend::Backend>(terminal: &mut Terminal<B>) -> io::Resu
                 match key.code {
                     KeyCode::Char('q') | KeyCode::Esc => return Ok(()),
                     KeyCode::Char('r') => {
-                        last_metrics_update =
-                            Instant::now().checked_sub(metrics_update_interval).unwrap();
+                        last_metrics_update = Instant::now()
+                            .checked_sub(metrics_update_interval)
+                            .unwrap_or_else(Instant::now);
                     }
                     _ => {}
                 }

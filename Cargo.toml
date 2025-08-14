@@ -17,4 +17,4 @@ crossterm = "0.27"
 rand = "0.9.2"
 
 [lints.clippy]
-pedantic = "warn"
+pedantic = "deny"
