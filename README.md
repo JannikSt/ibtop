@@ -16,6 +16,13 @@ Real-time terminal monitor for InfiniBand networks - htop for high-speed interco
 curl -fsSL https://raw.githubusercontent.com/JannikSt/ibtop/main/install.sh | bash
 ```
 
+### Install from crates.io
+
+```bash
+# Install using cargo
+cargo install ibtop
+```
+
 ### Manual Installation
 
 ```bash
