@@ -76,6 +76,22 @@ ibtop
 
 Apache License 2.0
 
+## Development
+
+### Pre-commit Hooks
+
+This project uses pre-commit hooks to ensure code quality. To set them up:
+
+```bash
+# Install pre-commit
+pip install pre-commit
+
+# Install the git hook scripts
+pre-commit install
+```
+
+The hooks will automatically run `cargo fmt` and `cargo clippy` before each commit.
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
