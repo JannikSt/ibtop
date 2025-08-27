@@ -7,7 +7,7 @@ description = "Real-time terminal monitor for InfiniBand networks"
 readme = "README.md"
 homepage = "https://github.com/JannikSt/ibtop"
 repository = "https://github.com/JannikSt/ibtop"
-license = "MIT"
+license = "Apache-2.0"
 keywords = ["infiniband", "monitoring", "tui", "network", "rdma"]
 categories = ["command-line-utilities", "network-programming"]
 
