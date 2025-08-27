@@ -1,6 +1,6 @@
 [package]
 name = "ibtop"
-version = "0.1.2"
+version = "0.1.4"
 edition = "2021"
 authors = ["info@jannik-straube.de"]
 description = "Real-time terminal monitor for InfiniBand networks"
