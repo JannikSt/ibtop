@@ -23,7 +23,8 @@ pub fn draw(frame: &mut Frame, adapters: &[AdapterInfo], metrics: &MetricsCollec
 }
 
 fn draw_help_footer(frame: &mut Frame, area: Rect) {
-    let help_text = Paragraph::new("Controls: q=quit, Ctrl+C=quit").style(Style::default().fg(Color::DarkGray));
+    let help_text =
+        Paragraph::new("Controls: q=quit, Ctrl+C=quit").style(Style::default().fg(Color::DarkGray));
     frame.render_widget(help_text, area);
 }
 #[allow(clippy::too_many_lines)]
