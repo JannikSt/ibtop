@@ -133,6 +133,8 @@ dependencies = [
  "crossterm",
  "rand",
  "ratatui",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -189,6 +191,12 @@ checksum = "234cf4f4a04dc1f57e24b96cc0cd600cf2af460d4161ac5ecdd0af8e1f3b2a38"
 dependencies = [
  "hashbrown",
 ]
+
+[[package]]
+name = "memchr"
+version = "2.7.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "32a282da65faaf38286cf3be983213fcf1d2e2a58700e808f83f4ea9a4804bc0"
 
 [[package]]
 name = "mio"
@@ -339,6 +347,38 @@ name = "scopeguard"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
+
+[[package]]
+name = "serde"
+version = "1.0.219"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5f0e2c6ed6606019b4e29e69dbaba95b11854410e5347d525002456dbbb786b6"
+dependencies = [
+ "serde_derive",
+]
+
+[[package]]
+name = "serde_derive"
+version = "1.0.219"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5b0276cf7f2c73365f7157c8123c21cd9a50fbbd844757af28ca1f5925fc2a00"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "serde_json"
+version = "1.0.143"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d401abef1d108fbd9cbaebc3e46611f4b1021f714a0597a71f41ee463f5f4a5a"
+dependencies = [
+ "itoa",
+ "memchr",
+ "ryu",
+ "serde",
+]
 
 [[package]]
 name = "signal-hook"

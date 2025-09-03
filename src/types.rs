@@ -1,7 +1,8 @@
+use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use std::str::FromStr;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub(crate) enum PortState {
     Active,
     Down,
@@ -29,13 +30,13 @@ impl FromStr for PortState {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub(crate) struct AdapterInfo {
     pub(crate) name: String,
     pub(crate) ports: Vec<PortInfo>,
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub(crate) struct PortInfo {
     pub(crate) port_number: u16,
     pub(crate) state: PortState,
@@ -43,7 +44,7 @@ pub(crate) struct PortInfo {
     pub(crate) counters: PortCounters,
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub(crate) struct PortCounters {
     pub(crate) rx_bytes: u64,
     pub(crate) tx_bytes: u64,
