@@ -8,7 +8,12 @@ use ratatui::{
 use crate::metrics::MetricsCollector;
 use crate::types::AdapterInfo;
 
-pub fn draw(frame: &mut Frame, adapters: &[AdapterInfo], metrics: &MetricsCollector, hostname: &str) {
+pub fn draw(
+    frame: &mut Frame,
+    adapters: &[AdapterInfo],
+    metrics: &MetricsCollector,
+    hostname: &str,
+) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([

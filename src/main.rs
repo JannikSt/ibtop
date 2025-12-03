@@ -17,7 +17,10 @@ const UI_REFRESH_INTERVAL_MS: u64 = 33;
 const METRICS_UPDATE_INTERVAL_MS: u64 = 250;
 
 fn get_hostname() -> String {
-    hostname::get().map_or_else(|_| "unknown".to_string(), |h| h.to_string_lossy().into_owned())
+    hostname::get().map_or_else(
+        |_| "unknown".to_string(),
+        |h| h.to_string_lossy().into_owned(),
+    )
 }
 
 fn main() -> Result<(), io::Error> {
