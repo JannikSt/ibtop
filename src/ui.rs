@@ -138,17 +138,13 @@ fn draw_adapters(
                     .add_modifier(Modifier::UNDERLINED),
             ),
         ]))
-        .block(
-            Block::default()
-                .borders(Borders::ALL)
-                .title(format!(
-                    "ibtop - InfiniBand Monitor @ {}",
-                    hostname::get().map_or_else(
-                        |_| "unknown".to_string(),
-                        |h| h.to_string_lossy().into_owned()
-                    )
-                )),
-        );
+        .block(Block::default().borders(Borders::ALL).title(format!(
+            "ibtop - InfiniBand Monitor @ {}",
+            hostname::get().map_or_else(
+                |_| "unknown".to_string(),
+                |h| h.to_string_lossy().into_owned()
+            )
+        )));
 
     frame.render_widget(table, area);
 }
