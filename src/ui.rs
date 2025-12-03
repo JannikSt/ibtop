@@ -8,7 +8,7 @@ use ratatui::{
 use crate::metrics::MetricsCollector;
 use crate::types::AdapterInfo;
 
-pub fn draw(frame: &mut Frame, adapters: &[AdapterInfo], metrics: &MetricsCollector) {
+pub fn draw(frame: &mut Frame, adapters: &[AdapterInfo], metrics: &MetricsCollector, hostname: &str) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
@@ -18,7 +18,7 @@ pub fn draw(frame: &mut Frame, adapters: &[AdapterInfo], metrics: &MetricsCollec
         ])
         .split(frame.size());
 
-    draw_adapters(frame, chunks[1], adapters, metrics);
+    draw_adapters(frame, chunks[1], adapters, metrics, hostname);
     draw_help_footer(frame, chunks[2]);
 }
 
@@ -33,6 +33,7 @@ fn draw_adapters(
     area: Rect,
     adapters: &[AdapterInfo],
     metrics: &MetricsCollector,
+    hostname: &str,
 ) {
     let mut rows: Vec<Row> = Vec::new();
 
@@ -138,13 +139,11 @@ fn draw_adapters(
                     .add_modifier(Modifier::UNDERLINED),
             ),
         ]))
-        .block(Block::default().borders(Borders::ALL).title(format!(
-            "ibtop - InfiniBand Monitor @ {}",
-            hostname::get().map_or_else(
-                |_| "unknown".to_string(),
-                |h| h.to_string_lossy().into_owned()
-            )
-        )));
+        .block(
+            Block::default()
+                .borders(Borders::ALL)
+                .title(format!("ibtop - InfiniBand Monitor @ {hostname}")),
+        );
 
     frame.render_widget(table, area);
 }

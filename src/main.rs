@@ -16,6 +16,10 @@ use std::time::{Duration, Instant};
 const UI_REFRESH_INTERVAL_MS: u64 = 33;
 const METRICS_UPDATE_INTERVAL_MS: u64 = 250;
 
+fn get_hostname() -> String {
+    hostname::get().map_or_else(|_| "unknown".to_string(), |h| h.to_string_lossy().into_owned())
+}
+
 fn main() -> Result<(), io::Error> {
     let args: Vec<String> = env::args().collect();
     let json_mode = args.contains(&String::from("--json"));
@@ -41,12 +45,10 @@ fn run_json_mode() -> Result<(), io::Error> {
         }
     };
 
-    let hostname = hostname::get().map_or_else(
-        |_| "unknown".to_string(),
-        |h| h.to_string_lossy().into_owned(),
-    );
-
-    let output = types::IbtopOutput { hostname, adapters };
+    let output = types::IbtopOutput {
+        hostname: get_hostname(),
+        adapters,
+    };
     let json_output = serde_json::to_string_pretty(&output)?;
     println!("{json_output}");
 
@@ -80,6 +82,7 @@ fn run_interactive_mode() -> Result<(), io::Error> {
 fn run_app<B: ratatui::backend::Backend>(terminal: &mut Terminal<B>) -> io::Result<()> {
     let use_fake_data = std::env::var("IBTOP_FAKE_DATA").is_ok();
     let mut metrics = metrics::MetricsCollector::new();
+    let hostname = get_hostname();
 
     let ui_refresh_duration = Duration::from_millis(UI_REFRESH_INTERVAL_MS);
     let metrics_update_interval = Duration::from_millis(METRICS_UPDATE_INTERVAL_MS);
@@ -106,7 +109,7 @@ fn run_app<B: ratatui::backend::Backend>(terminal: &mut Terminal<B>) -> io::Resu
             last_metrics_update = now;
         }
 
-        terminal.draw(|f| ui::draw(f, &adapters, &metrics))?;
+        terminal.draw(|f| ui::draw(f, &adapters, &metrics, &hostname))?;
 
         let timeout = ui_refresh_duration.saturating_sub(now.elapsed());
         if event::poll(timeout)? {
