@@ -141,7 +141,13 @@ fn draw_adapters(
         .block(
             Block::default()
                 .borders(Borders::ALL)
-                .title("ibtop - InfiniBand Monitor"),
+                .title(format!(
+                    "ibtop - InfiniBand Monitor @ {}",
+                    hostname::get().map_or_else(
+                        |_| "unknown".to_string(),
+                        |h| h.to_string_lossy().into_owned()
+                    )
+                )),
         );
 
     frame.render_widget(table, area);

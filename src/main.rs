@@ -41,7 +41,11 @@ fn run_json_mode() -> Result<(), io::Error> {
         }
     };
 
-    let json_output = serde_json::to_string_pretty(&adapters)?;
+    let hostname = hostname::get()
+        .map_or_else(|_| "unknown".to_string(), |h| h.to_string_lossy().into_owned());
+
+    let output = types::IbtopOutput { hostname, adapters };
+    let json_output = serde_json::to_string_pretty(&output)?;
     println!("{json_output}");
 
     Ok(())
