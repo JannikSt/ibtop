@@ -45,7 +45,7 @@ fn draw_adapters(
             // Add adapter header row that spans the full width
             rows.push(Row::new(vec![
                 Cell::from("Adapter:"),
-                Cell::from(adapter.name.to_string()).style(
+                Cell::from(adapter.name.clone()).style(
                     Style::default()
                         .fg(Color::Green)
                         .add_modifier(Modifier::BOLD),
