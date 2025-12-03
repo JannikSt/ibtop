@@ -2,6 +2,12 @@ use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use std::str::FromStr;
 
+#[derive(Debug, Serialize, Deserialize)]
+pub(crate) struct IbtopOutput {
+    pub(crate) hostname: String,
+    pub(crate) adapters: Vec<AdapterInfo>,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub(crate) enum PortState {
     Active,

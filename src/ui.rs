@@ -8,7 +8,12 @@ use ratatui::{
 use crate::metrics::MetricsCollector;
 use crate::types::AdapterInfo;
 
-pub fn draw(frame: &mut Frame, adapters: &[AdapterInfo], metrics: &MetricsCollector) {
+pub fn draw(
+    frame: &mut Frame,
+    adapters: &[AdapterInfo],
+    metrics: &MetricsCollector,
+    hostname: &str,
+) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
@@ -18,7 +23,7 @@ pub fn draw(frame: &mut Frame, adapters: &[AdapterInfo], metrics: &MetricsCollec
         ])
         .split(frame.size());
 
-    draw_adapters(frame, chunks[1], adapters, metrics);
+    draw_adapters(frame, chunks[1], adapters, metrics, hostname);
     draw_help_footer(frame, chunks[2]);
 }
 
@@ -33,6 +38,7 @@ fn draw_adapters(
     area: Rect,
     adapters: &[AdapterInfo],
     metrics: &MetricsCollector,
+    hostname: &str,
 ) {
     let mut rows: Vec<Row> = Vec::new();
 
@@ -45,7 +51,7 @@ fn draw_adapters(
             // Add adapter header row that spans the full width
             rows.push(Row::new(vec![
                 Cell::from("Adapter:"),
-                Cell::from(adapter.name.to_string()).style(
+                Cell::from(adapter.name.clone()).style(
                     Style::default()
                         .fg(Color::Green)
                         .add_modifier(Modifier::BOLD),
@@ -141,7 +147,7 @@ fn draw_adapters(
         .block(
             Block::default()
                 .borders(Borders::ALL)
-                .title("ibtop - InfiniBand Monitor"),
+                .title(format!("ibtop - InfiniBand Monitor @ {hostname}")),
         );
 
     frame.render_widget(table, area);
