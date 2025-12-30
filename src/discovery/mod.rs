@@ -23,9 +23,32 @@ pub(crate) fn discover_adapters() -> Vec<AdapterInfo> {
         }
     }
 
-    adapters.sort_by(|a, b| a.name.cmp(&b.name));
+    adapters.sort_by(|a, b| natural_cmp(&a.name, &b.name));
 
     adapters
+}
+
+/// Natural sort comparison that handles numeric suffixes correctly
+/// e.g., `mlx5_2` < `mlx5_10` (not lexicographic where `mlx5_10` < `mlx5_2`)
+fn natural_cmp(a: &str, b: &str) -> std::cmp::Ordering {
+    let extract_parts = |s: &str| -> (String, Option<u32>) {
+        if let Some(pos) = s.rfind(|c: char| !c.is_ascii_digit()) {
+            let prefix = &s[..=pos];
+            let suffix = &s[pos + 1..];
+            let num = suffix.parse().ok();
+            (prefix.to_string(), num)
+        } else {
+            (s.to_string(), None)
+        }
+    };
+
+    let (prefix_a, num_a) = extract_parts(a);
+    let (prefix_b, num_b) = extract_parts(b);
+
+    match prefix_a.cmp(&prefix_b) {
+        std::cmp::Ordering::Equal => num_a.cmp(&num_b),
+        other => other,
+    }
 }
 
 fn create_adapter_info(adapter_name: String, adapter_path: &std::path::Path) -> AdapterInfo {
