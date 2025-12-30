@@ -281,9 +281,10 @@ fn draw_main_table(
                 };
 
                 // Throughput bar (visual indicator of utilization)
+                // InfiniBand is full-duplex, so we use max(RX, TX) not sum
                 let utilization = if let Some(m) = port_metrics {
                     let max_rate = parse_max_rate(&port.rate);
-                    let current_rate = m.rx_bytes_per_sec + m.tx_bytes_per_sec;
+                    let current_rate = m.rx_bytes_per_sec.max(m.tx_bytes_per_sec);
                     (current_rate / max_rate * 100.0).min(100.0)
                 } else {
                     0.0
@@ -695,13 +696,12 @@ fn render_utilization_bar(percent: f64, width: usize) -> String {
 
 /// Parse max rate from rate string (e.g., "100 Gb/sec" -> bytes/sec)
 fn parse_max_rate(rate_str: &str) -> f64 {
-    // Extract the number and unit
-    let parts: Vec<&str> = rate_str.split_whitespace().collect();
-    if parts.len() >= 2 {
-        if let Ok(num) = parts[0].parse::<f64>() {
-            // Convert Gb/sec to bytes/sec
-            return num * 1_000_000_000.0 / 8.0;
-        }
+    // Extract numeric value from rate string
+    // Handles formats like "400 Gb/sec", "400Gb/sec", "400 Gb/sec (4X NDR)"
+    let num_str: String = rate_str.chars().take_while(char::is_ascii_digit).collect();
+    if let Ok(num) = num_str.parse::<f64>() {
+        // Convert Gb/sec to bytes/sec
+        return num * 1_000_000_000.0 / 8.0;
     }
     // Default to 100 Gbps
     12_500_000_000.0
@@ -802,7 +802,11 @@ mod tests {
     #[test]
     fn test_parse_max_rate() {
         assert!((parse_max_rate("100 Gb/sec (4X EDR)") - 12_500_000_000.0).abs() < 1.0);
+        assert!((parse_max_rate("100 Gb/sec (2X HDR)") - 12_500_000_000.0).abs() < 1.0);
         assert!((parse_max_rate("200 Gb/sec") - 25_000_000_000.0).abs() < 1.0);
+        assert!((parse_max_rate("400 Gb/sec (4X NDR)") - 50_000_000_000.0).abs() < 1.0);
+        assert!((parse_max_rate("800 Gb/sec (4X XDR)") - 100_000_000_000.0).abs() < 1.0);
+        assert!((parse_max_rate("800Gb/sec") - 100_000_000_000.0).abs() < 1.0); // No space
         assert!((parse_max_rate("invalid") - 12_500_000_000.0).abs() < 1.0); // Default
     }
 
