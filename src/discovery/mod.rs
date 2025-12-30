@@ -1,5 +1,3 @@
-pub(crate) mod fake;
-
 use crate::types::{AdapterInfo, PortCounters, PortInfo, PortState};
 
 const MLX5_DATA_MULTIPLIER: u64 = 4; // mlx5 reports in 32-bit words
