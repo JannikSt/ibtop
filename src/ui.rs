@@ -102,11 +102,7 @@ impl AppState {
 
     /// Cycle detail tab backward
     pub fn prev_tab(&mut self) {
-        self.detail_tab = if self.detail_tab == 0 {
-            2
-        } else {
-            self.detail_tab - 1
-        };
+        self.detail_tab = if self.detail_tab == 0 { 2 } else { self.detail_tab - 1 };
     }
 
     fn update_selectable_items(&mut self, adapters: &[AdapterInfo]) {
@@ -114,8 +110,7 @@ impl AppState {
         for adapter in adapters {
             self.selectable_items.push(None); // Adapter header
             for port in &adapter.ports {
-                self.selectable_items
-                    .push(Some((adapter.name.clone(), port.port_number)));
+                self.selectable_items.push(Some((adapter.name.clone(), port.port_number)));
             }
         }
         // Ensure selection is valid
@@ -149,7 +144,10 @@ pub fn draw(
     let main_layout = Layout::default()
         .direction(Direction::Vertical)
         .constraints(if state.detail_expanded {
-            vec![Constraint::Percentage(50), Constraint::Percentage(50)]
+            vec![
+                Constraint::Percentage(50),
+                Constraint::Percentage(50),
+            ]
         } else {
             vec![Constraint::Min(0)]
         })
@@ -164,6 +162,21 @@ pub fn draw(
     }
 }
 
+/// Calculate total throughput across all active ports
+fn calculate_totals(adapters: &[AdapterInfo], metrics: &MetricsCollector) -> (f64, f64) {
+    let mut total_rx = 0.0;
+    let mut total_tx = 0.0;
+    for adapter in adapters {
+        for port in &adapter.ports {
+            if let Some(m) = metrics.get_metrics(&adapter.name, port.port_number) {
+                total_rx += m.rx_bytes_per_sec;
+                total_tx += m.tx_bytes_per_sec;
+            }
+        }
+    }
+    (total_rx, total_tx)
+}
+
 /// Draw the main table with sparklines
 #[allow(clippy::too_many_lines)]
 fn draw_main_table(
@@ -174,6 +187,9 @@ fn draw_main_table(
     hostname: &str,
     state: &AppState,
 ) {
+    // Calculate totals for header
+    let (total_rx, total_tx) = calculate_totals(adapters, metrics);
+
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([Constraint::Min(0), Constraint::Length(2)])
@@ -198,13 +214,9 @@ fn draw_main_table(
             // Adapter header row with visual separator
             let is_header_selected = state.selected_row == row_idx;
             let header_style = if is_header_selected {
-                Style::default()
-                    .fg(Color::Cyan)
-                    .add_modifier(Modifier::BOLD)
+                Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)
             } else {
-                Style::default()
-                    .fg(Color::Green)
-                    .add_modifier(Modifier::BOLD)
+                Style::default().fg(Color::Green).add_modifier(Modifier::BOLD)
             };
 
             rows.push(
@@ -231,11 +243,7 @@ fn draw_main_table(
                 let (state_str, state_color) = match port.state {
                     PortState::Active => {
                         // Subtle pulse: alternates between bright and dim dot
-                        let pulse = if state.frame_count % 60 < 30 {
-                            "●"
-                        } else {
-                            "○"
-                        };
+                        let pulse = if state.frame_count % 60 < 30 { "●" } else { "○" };
                         (format!("{pulse}ACTIVE"), Color::Green)
                     }
                     PortState::Down => ("○DOWN".to_string(), Color::Red),
@@ -252,11 +260,11 @@ fn draw_main_table(
                     ("--".to_string(), "--".to_string())
                 };
 
-                // Sparkline data
+                // Sparkline data (with padding)
                 let sparkline_str = if let Some(h) = history {
-                    render_inline_sparkline(&h.combined_sparkline_data(SPARKLINE_SAMPLES))
+                    format!(" {} ", render_inline_sparkline(&h.combined_sparkline_data(SPARKLINE_SAMPLES)))
                 } else {
-                    " ".repeat(SPARKLINE_SAMPLES)
+                    " ".repeat(SPARKLINE_SAMPLES + 2)
                 };
 
                 // Throughput bar (visual indicator of utilization)
@@ -280,11 +288,8 @@ fn draw_main_table(
                         Cell::from(format!("  {}", port.port_number))
                             .style(Style::default().fg(Color::Cyan)),
                         Cell::from(state_str).style(Style::default().fg(state_color)),
-                        Cell::from(truncate_rate(&port.rate)).style(
-                            Style::default()
-                                .fg(Color::White)
-                                .add_modifier(Modifier::DIM),
-                        ),
+                        Cell::from(truncate_rate(&port.rate))
+                            .style(Style::default().fg(Color::White).add_modifier(Modifier::DIM)),
                         Cell::from(bar),
                         Cell::from(rx_rate).style(Style::default().fg(Color::Blue)),
                         Cell::from(tx_rate).style(Style::default().fg(Color::Magenta)),
@@ -301,14 +306,14 @@ fn draw_main_table(
     }
 
     let widths = [
-        Constraint::Length(4),                            // Port
-        Constraint::Length(8),                            // State
-        Constraint::Length(12),                           // Link Rate
-        Constraint::Length(10),                           // Utilization bar
-        Constraint::Length(10),                           // RX Rate
-        Constraint::Length(10),                           // TX Rate
-        Constraint::Length(SPARKLINE_SAMPLES as u16 + 2), // Sparkline
-        Constraint::Length(2),                            // Selection indicator
+        Constraint::Length(4),  // Port
+        Constraint::Length(8),  // State
+        Constraint::Length(12), // Link Rate
+        Constraint::Length(10), // Utilization bar
+        Constraint::Length(10), // RX Rate
+        Constraint::Length(10), // TX Rate
+        Constraint::Length(SPARKLINE_SAMPLES as u16 + 4), // Sparkline (padded)
+        Constraint::Length(2),  // Selection indicator
     ];
 
     let header_style = Style::default()
@@ -335,14 +340,14 @@ fn draw_main_table(
                 .borders(Borders::ALL)
                 .border_style(Style::default().fg(Color::DarkGray))
                 .title(Line::from(vec![
-                    Span::styled(
-                        " ibtop ",
-                        Style::default()
-                            .fg(Color::Cyan)
-                            .add_modifier(Modifier::BOLD),
-                    ),
+                    Span::styled(" ibtop ", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
                     Span::styled("@ ", Style::default().fg(Color::DarkGray)),
                     Span::styled(hostname, Style::default().fg(Color::White)),
+                    Span::styled("  │  ", Style::default().fg(Color::DarkGray)),
+                    Span::styled("▲ ", Style::default().fg(Color::Green)),
+                    Span::styled(format_bytes_per_sec(total_rx), Style::default().fg(Color::Green)),
+                    Span::styled("  ▼ ", Style::default().fg(Color::Blue)),
+                    Span::styled(format_bytes_per_sec(total_tx), Style::default().fg(Color::Blue)),
                     Span::styled(" ", Style::default()),
                 ]))
                 .title_style(Style::default()),
@@ -390,12 +395,9 @@ fn draw_detail_panel(
     let block = Block::default()
         .borders(Borders::ALL)
         .border_style(Style::default().fg(Color::DarkGray))
-        .title(Line::from(vec![Span::styled(
-            " Detail View ",
-            Style::default()
-                .fg(Color::Yellow)
-                .add_modifier(Modifier::BOLD),
-        )]));
+        .title(Line::from(vec![
+            Span::styled(" Detail View ", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
+        ]));
 
     // Get selected port info
     let selected = state.selected_port();
@@ -433,11 +435,7 @@ fn draw_detail_panel(
     let tabs = Tabs::new(vec!["Throughput", "Packets", "Errors"])
         .select(state.detail_tab)
         .style(Style::default().fg(Color::DarkGray))
-        .highlight_style(
-            Style::default()
-                .fg(Color::Cyan)
-                .add_modifier(Modifier::BOLD),
-        )
+        .highlight_style(Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD))
         .divider(Span::raw(" | "));
 
     frame.render_widget(tabs, detail_layout[0]);
@@ -445,33 +443,18 @@ fn draw_detail_panel(
     // Stats summary
     if let (Some(port), Some(m)) = (port_info, current_metrics) {
         let stats_line = Line::from(vec![
-            Span::styled(
-                format!("{adapter_name}:"),
-                Style::default().fg(Color::Green),
-            ),
-            Span::styled(
-                format!("{port_num} ", port_num = port.port_number),
-                Style::default().fg(Color::Cyan),
-            ),
-            Span::styled(
-                format!("{} ", port.state),
-                Style::default().fg(match port.state {
-                    PortState::Active => Color::Green,
-                    PortState::Down => Color::Red,
-                    PortState::Unknown => Color::Yellow,
-                }),
-            ),
+            Span::styled(format!("{adapter_name}:"), Style::default().fg(Color::Green)),
+            Span::styled(format!("{port_num} ", port_num = port.port_number), Style::default().fg(Color::Cyan)),
+            Span::styled(format!("{} ", port.state), Style::default().fg(match port.state {
+                PortState::Active => Color::Green,
+                PortState::Down => Color::Red,
+                PortState::Unknown => Color::Yellow,
+            })),
             Span::styled("| ", Style::default().fg(Color::DarkGray)),
             Span::styled("RX: ", Style::default().fg(Color::DarkGray)),
-            Span::styled(
-                format_bytes_per_sec(m.rx_bytes_per_sec),
-                Style::default().fg(Color::Blue),
-            ),
+            Span::styled(format_bytes_per_sec(m.rx_bytes_per_sec), Style::default().fg(Color::Blue)),
             Span::styled(" TX: ", Style::default().fg(Color::DarkGray)),
-            Span::styled(
-                format_bytes_per_sec(m.tx_bytes_per_sec),
-                Style::default().fg(Color::Magenta),
-            ),
+            Span::styled(format_bytes_per_sec(m.tx_bytes_per_sec), Style::default().fg(Color::Magenta)),
         ]);
 
         let stats_para = Paragraph::new(stats_line);
@@ -482,7 +465,8 @@ fn draw_detail_panel(
     if let Some(h) = history {
         draw_chart(frame, detail_layout[2], h, state.detail_tab);
     } else {
-        let msg = Paragraph::new("Collecting data...").style(Style::default().fg(Color::DarkGray));
+        let msg = Paragraph::new("Collecting data...")
+            .style(Style::default().fg(Color::DarkGray));
         frame.render_widget(msg, detail_layout[2]);
     }
 }
@@ -628,10 +612,7 @@ fn draw_chart(frame: &mut Frame, area: Rect, history: &PortHistory, tab: usize) 
                 .bounds([0.0, max_scaled * 1.1])
                 .labels(vec![
                     Span::raw("0"),
-                    Span::styled(
-                        format!("{max_scaled:.1}"),
-                        Style::default().fg(Color::White),
-                    ),
+                    Span::styled(format!("{max_scaled:.1}"), Style::default().fg(Color::White)),
                 ]),
         );
 

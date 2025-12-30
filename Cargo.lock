@@ -197,7 +197,7 @@ dependencies = [
 
 [[package]]
 name = "ibtop"
-version = "0.1.7"
+version = "1.0.0"
 dependencies = [
  "crossterm",
  "hostname",
