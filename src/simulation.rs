@@ -355,13 +355,10 @@ mod tests {
     fn test_utilization_bounds() {
         for pattern in TrafficPattern::all() {
             for t in 0..100 {
-                let util = calculate_utilization(*pattern, t as f64 * 0.1);
+                let util = calculate_utilization(*pattern, f64::from(t) * 0.1);
                 assert!(
                     util >= 0.0 && util <= 1.0,
-                    "Pattern {:?} at t={}: util={}",
-                    pattern,
-                    t,
-                    util
+                    "Pattern {pattern:?} at t={t}: util={util}"
                 );
             }
         }
