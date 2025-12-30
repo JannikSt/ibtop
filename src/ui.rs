@@ -698,10 +698,7 @@ fn render_utilization_bar(percent: f64, width: usize) -> String {
 fn parse_max_rate(rate_str: &str) -> f64 {
     // Extract numeric value from rate string
     // Handles formats like "400 Gb/sec", "400Gb/sec", "400 Gb/sec (4X NDR)"
-    let num_str: String = rate_str
-        .chars()
-        .take_while(char::is_ascii_digit)
-        .collect();
+    let num_str: String = rate_str.chars().take_while(char::is_ascii_digit).collect();
     if let Ok(num) = num_str.parse::<f64>() {
         // Convert Gb/sec to bytes/sec
         return num * 1_000_000_000.0 / 8.0;
