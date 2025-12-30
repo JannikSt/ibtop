@@ -356,7 +356,13 @@ mod tests {
         for pattern in TrafficPattern::all() {
             for t in 0..100 {
                 let util = calculate_utilization(*pattern, t as f64 * 0.1);
-                assert!(util >= 0.0 && util <= 1.0, "Pattern {:?} at t={}: util={}", pattern, t, util);
+                assert!(
+                    util >= 0.0 && util <= 1.0,
+                    "Pattern {:?} at t={}: util={}",
+                    pattern,
+                    t,
+                    util
+                );
             }
         }
     }
@@ -400,7 +406,9 @@ mod tests {
     #[test]
     fn test_avg_packet_sizes() {
         // Verify packet sizes are reasonable
-        assert!(avg_packet_size(TrafficPattern::Interactive) < avg_packet_size(TrafficPattern::Steady));
+        assert!(
+            avg_packet_size(TrafficPattern::Interactive) < avg_packet_size(TrafficPattern::Steady)
+        );
         assert!(avg_packet_size(TrafficPattern::Burst) < avg_packet_size(TrafficPattern::Steady));
     }
 }

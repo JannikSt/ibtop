@@ -403,10 +403,7 @@ mod tests {
         assert_eq!(collector.port_count(), 3);
 
         // Retain only mlx5_0:1 and mlx5_1:1
-        collector.retain_ports(&[
-            ("mlx5_0".to_string(), 1),
-            ("mlx5_1".to_string(), 1),
-        ]);
+        collector.retain_ports(&[("mlx5_0".to_string(), 1), ("mlx5_1".to_string(), 1)]);
 
         assert_eq!(collector.port_count(), 2);
         assert!(collector.get("mlx5_0", 1).is_some());
