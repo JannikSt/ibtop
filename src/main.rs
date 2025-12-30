@@ -1,5 +1,7 @@
 mod discovery;
+mod history;
 mod metrics;
+mod simulation;
 mod types;
 mod ui;
 
@@ -38,11 +40,11 @@ fn run_json_mode() -> Result<(), io::Error> {
     let use_fake_data = std::env::var("IBTOP_FAKE_DATA").is_ok();
 
     let adapters = if use_fake_data {
-        discovery::fake::generate_fake_adapters()
+        simulation::generate_fake_adapters()
     } else {
         let real_adapters = discovery::discover_adapters();
         if real_adapters.is_empty() && std::env::var("IBTOP_DEMO").is_ok() {
-            discovery::fake::generate_fake_adapters()
+            simulation::generate_fake_adapters()
         } else {
             real_adapters
         }
@@ -85,6 +87,7 @@ fn run_interactive_mode() -> Result<(), io::Error> {
 fn run_app<B: ratatui::backend::Backend>(terminal: &mut Terminal<B>) -> io::Result<()> {
     let use_fake_data = std::env::var("IBTOP_FAKE_DATA").is_ok();
     let mut metrics = metrics::MetricsCollector::new();
+    let mut app_state = ui::AppState::new();
     let hostname = get_hostname();
 
     let ui_refresh_duration = Duration::from_millis(UI_REFRESH_INTERVAL_MS);
@@ -98,11 +101,11 @@ fn run_app<B: ratatui::backend::Backend>(terminal: &mut Terminal<B>) -> io::Resu
 
         if now.duration_since(last_metrics_update) >= metrics_update_interval {
             adapters = if use_fake_data {
-                discovery::fake::generate_fake_adapters()
+                simulation::generate_fake_adapters()
             } else {
                 let real_adapters = discovery::discover_adapters();
                 if real_adapters.is_empty() && std::env::var("IBTOP_DEMO").is_ok() {
-                    discovery::fake::generate_fake_adapters()
+                    simulation::generate_fake_adapters()
                 } else {
                     real_adapters
                 }
@@ -112,21 +115,34 @@ fn run_app<B: ratatui::backend::Backend>(terminal: &mut Terminal<B>) -> io::Resu
             last_metrics_update = now;
         }
 
-        terminal.draw(|f| ui::draw(f, &adapters, &metrics, &hostname))?;
+        terminal.draw(|f| ui::draw(f, &adapters, &metrics, &hostname, &mut app_state))?;
 
         let timeout = ui_refresh_duration.saturating_sub(now.elapsed());
         if event::poll(timeout)? {
             if let Event::Key(key) = event::read()? {
                 match key.code {
+                    // Quit
                     KeyCode::Char('q') | KeyCode::Esc => return Ok(()),
                     KeyCode::Char('c') if key.modifiers.contains(KeyModifiers::CONTROL) => {
                         return Ok(())
                     }
+
+                    // Navigation
+                    KeyCode::Char('j') | KeyCode::Down => app_state.select_next(),
+                    KeyCode::Char('k') | KeyCode::Up => app_state.select_prev(),
+
+                    // Detail view
+                    KeyCode::Enter => app_state.toggle_detail(),
+                    KeyCode::Tab if app_state.detail_expanded => app_state.next_tab(),
+                    KeyCode::BackTab if app_state.detail_expanded => app_state.prev_tab(),
+
+                    // Force refresh
                     KeyCode::Char('r') => {
                         last_metrics_update = Instant::now()
                             .checked_sub(metrics_update_interval)
                             .unwrap_or_else(Instant::now);
                     }
+
                     _ => {}
                 }
             }

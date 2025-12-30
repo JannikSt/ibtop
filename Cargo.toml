@@ -1,6 +1,6 @@
 [package]
 name = "ibtop"
-version = "0.1.7"
+version = "1.0.0"
 edition = "2021"
 authors = ["info@jannik-straube.de"]
 description = "Real-time terminal monitor for InfiniBand networks"
@@ -12,12 +12,15 @@ keywords = ["infiniband", "monitoring", "tui", "network", "rdma"]
 categories = ["command-line-utilities", "network-programming"]
 
 [dependencies]
-ratatui = "0.26"
-crossterm = "0.27"
+ratatui = "0.29"
+crossterm = "0.28"
 rand = "0.9.2"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 hostname = "0.4"
+
+[dev-dependencies]
+tempfile = "3.14"
 
 [lints.clippy]
 pedantic = "deny"
